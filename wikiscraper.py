@@ -52,7 +52,7 @@ br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.
 base_url = "http://www.ethics.state.tx.us/php/cesearchAdvanced.html"
 
 #Query Dates
-begin_date=(date.today() + relativedelta(months=-1)).strftime('%m/%d/%Y')
+begin_date=(date.today() + relativedelta(months=-1)+ relativedelta(days=+1)).strftime('%m/%d/%Y')
 end_date=date.today().strftime('%m/%d/%Y')
 
 

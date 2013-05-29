@@ -1,0 +1,20 @@
+
+DATA SOURCE:
+http://www.ethics.state.tx.us/php/cesearchAdvanced.html
+
+*For more assistance with searching campaign finance reports please call Technical Support at 512-463-5800 Monday through Friday, 8:00AM - 5:00PM Central Time.
+
+
+
+*** IMPORTANT NOTE ON DUPLICATES ***
+Source: site search help
+	Advanced Search Data Results: The data in your result set will include ALL reports that have been filed electronically and meet your search criteria.  This means you will see the information reported in any original report and any corrections made to that report.
+
+	Corrected reports contain all the data from the original report plus any corrections.  So, if a report was corrected, your results will contain duplicate data because the information from both the original and corrected report will be listed.  In the HTML results, the corrected report information is highlighted in blue.  In the Excel spreadsheet results, the type of report is denoted in the column called rpt_number.  An original report is denoted with a zero (0).  A corrected report is denoted with a number from 1 or higher.  For example, the first correction has a value of 1 in rpt_number; the second correction has a value of 2 in rpt_number, etc.
+
+		[Corrected reports are indicated online, per above, and are being captured in the scrape.]
+
+	Data from Special Pre-Election and Special Session reports are required to also be reported on the subsequent report.  For example, if your search criteria covers a span that has both Special Pre-Election or Special Session reports and the subsequent semi-annual report, you would see everything reported on the Special Pre-Election report twice in your results; once from the Special Pre-Election report and once from the semi-annual report. This is duplicate data from the multiple filing requirements, not additional data.
+
+		[This duplication is NOT indicated online or captured with the scrape... Buyer beware.]
+

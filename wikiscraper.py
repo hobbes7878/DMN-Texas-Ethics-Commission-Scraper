@@ -62,11 +62,9 @@ end_date = date(2013,04,28)
 
 #date range
 query_dates = []
-current_date = begin_date
-
-while current_date < end_date:
-    query_dates.append(current_date)
-    current_date += timedelta(days=1)
+while begin_date < end_date:
+    query_dates.append(begin_date)
+    begin_date += timedelta(days=1)
 print query_dates
 
 

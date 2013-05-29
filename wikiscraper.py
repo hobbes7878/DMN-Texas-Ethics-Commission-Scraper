@@ -16,9 +16,6 @@ from dateutil.relativedelta import relativedelta
 
 
 
-  
-
-
 #####################################################
 ## Mechanize Presets ##
 #####################################################
@@ -49,92 +46,116 @@ br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.
 
 ###################################################
 
+
 base_url = "http://www.ethics.state.tx.us/php/cesearchAdvanced.html"
 
-#Query Dates
-begin_date=(date.today() + relativedelta(months=-1)+ relativedelta(days=+1)).strftime('%m/%d/%Y')
-end_date=date.today().strftime('%m/%d/%Y')
+####Query Dates####
+
+#UNCOMMENT BELOW FOR MONTHLY RUNS
+#begin_date=(date.today() + relativedelta(months=-1)+ relativedelta(days=+1))
+#end_date=date.today()
+
+#UNCOMMENT BELOW FOR SPECIFIC DATE RUNS
+#DATES ARE INCLUSIVE
+begin_date = date(2013,04,01)
+end_date = date(2013,04,28)
+
+#date range
+query_dates = []
+current_date = begin_date
+
+while current_date < end_date:
+    query_dates.append(current_date)
+    current_date += timedelta(days=1)
+print query_dates
+
+
 
 
 #This shouldn't change
 search_trans_list=["rcpt_src","expn_src","pldg_src","loan_src","guar_src","CRED_SRC"]
 
-for trans in search_trans_list:
-    create_table_string="create table "+trans+" ('Report Num' string)"
-    scraperwiki.sqlite.execute(create_table_string)
 
-scraperwiki.sqlite.commit()  
+#UNCOMMENT IF FIRST RUN TO CREATE TABLES
+#for trans in search_trans_list:
+#    create_table_string="create table "+trans+" ('Report Num' string)"
+#    scraperwiki.sqlite.execute(create_table_string)
+#scraperwiki.sqlite.commit()  
 
-for search_trans in search_trans_list:
-    print "Query Type: " + search_trans
-    #for search_alpha in string.uppercase:
-        #print "Query Alpha: " + search_alpha
-    br.open(base_url)
-    br.form = list(br.forms())[0]
-    br.form.set_all_readonly(False)
-            
-    #needed to set a bunch of form field values to list objects. For some reason...
-    br["transaction"]=[search_trans]
-    br["searchtype"]=["1"]
-    br["datetype"]=["2"]
-    br["filnamsearchA"]=["2"]
-    #br["inameA"]=search_alpha #Commenting out for all alpha..
-    br["begin_dateA"]=begin_date
-    br["end_dateA"]=end_date
-    br["repyearA"]=["0"]
-    br["filertypeA"]=["ALL"]
-    br["namesearch"]=["3"]
-    br["repyearB"]=["0"]
-    br["filertypeC"]=["ALL"]
-    br["filnamsearchB"]=["2"]
-    br["filertypeB"]=["ALL"]
-    br["sortorder"]=["name"]
-    br["ad"]=["ascend"]
-    br["format"]="Retrieve HTML"
-    br["begin_date"]=begin_date
-    br["end_date"]=end_date
-    br["repyear"]="0"
-    br["filnamsearch"]="undefined"
-    #br["iname"]=search_alpha
-    br["filertype"]="ALL"
+
+for q_date in query_dates:
+
+    print q_date.strftime('%m/%d/%Y')
+
+    for search_trans in search_trans_list:
+        print "Query Type: " + search_trans
     
-    br.form.set_all_readonly(True)
+        #for search_alpha in string.uppercase: #Don't need this loop
+            #print "Query Alpha: " + search_alpha
     
-    
-    response=br.submit()
-    response_read=response.read()
-    soup=BeautifulSoup(response_read)
-    
-    tables = soup.findAll('table', {'cellpadding':'4'})
-    
-    table_i=0  
-               
-    for table in tables:
+        br.open(base_url)
+        br.form = list(br.forms())[0]
+        br.form.set_all_readonly(False)
+                
+        #needed to set a bunch of form field values to list objects. For some reason...
+        br["transaction"]=[search_trans]
+        br["searchtype"]=["1"]
+        br["datetype"]=["2"]
+        br["filnamsearchA"]=["2"]
+        #br["inameA"]=search_alpha #Commenting out for all alpha..
+        br["begin_dateA"]=q_date.strftime('%m/%d/%Y')
+        br["end_dateA"]=q_date.strftime('%m/%d/%Y')
+        br["repyearA"]=["0"]
+        br["filertypeA"]=["ALL"]
+        br["namesearch"]=["3"]
+        br["repyearB"]=["0"]
+        br["filertypeC"]=["ALL"]
+        br["filnamsearchB"]=["2"]
+        br["filertypeB"]=["ALL"]
+        br["sortorder"]=["name"]
+        br["ad"]=["ascend"]
+        br["format"]="Retrieve HTML"
+        br["begin_date"]=q_date.strftime('%m/%d/%Y')
+        br["end_date"]=q_date.strftime('%m/%d/%Y')
+        br["repyear"]="0"
+        br["filnamsearch"]="undefined"
+        #br["iname"]=search_alpha
+        br["filertype"]="ALL"
         
-        #Console chatter
-        print "     "+str(table_i)
-        table_i+=100
-
+        br.form.set_all_readonly(True)
         
-        header_list=[]
-        ths=table.findChildren('th')
-        for th in ths:
-            header_list.append(th.text.encode('utf-8').replace('&nbsp;',' ').replace('#','Num').replace("'","").strip())
-        for punc in string.punctuation:
-            header_list=[hl.replace(punc,'') for hl in header_list]
-
-            
-        trs=table.findAll('tr')
-        for tr in trs:
         
-            tds=tr.findAll('td')
-            data={}
-            i=0
-            for td in tds:
-                data[header_list[i]]=td.text.encode('utf-8').replace('&nbsp;',' ').replace('---','')
-                i+=1
-            if tr['bgcolor'].upper() == "#D7F4FF":
-                data["Corrected_Report"]="Y"
+        response=br.submit()
+        response_read=response.read()
+        soup=BeautifulSoup(response_read)
+        
+        tables = soup.findAll('table', {'cellpadding':'4'})
+        
+        table_i=0  
+                   
+        for table in tables:
             
     
-            scraperwiki.sqlite.save(unique_keys=[], data=data, table_name=search_trans, verbose=2)
+            
+            header_list=[]
+            ths=table.findChildren('th')
+            for th in ths:
+                header_list.append(th.text.encode('utf-8').replace('&nbsp;',' ').replace('#','Num').replace("'","").strip())
+            for punc in string.punctuation:
+                header_list=[hl.replace(punc,'') for hl in header_list]
+    
+                
+            trs=table.findAll('tr')
+            for tr in trs:
+            
+                tds=tr.findAll('td')
+                data={}
+                i=0
+                for td in tds:
+                    data[header_list[i]]=td.text.encode('utf-8').replace('&nbsp;',' ').replace('---','')
+                    i+=1
+                if tr['bgcolor'].upper() == "#D7F4FF":
+                    data["Corrected_Report"]="Y"
+                
+        
+                scraperwiki.sqlite.save(unique_keys=[], data=data, table_name=search_trans, verbose=2)

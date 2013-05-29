@@ -1,4 +1,3 @@
-
 import scraperwiki
 import mechanize
 import cookielib
@@ -14,6 +13,7 @@ import sys
 import string
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+
 
 
   
@@ -51,13 +51,14 @@ br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.
 
 base_url = "http://www.ethics.state.tx.us/php/cesearchAdvanced.html"
 
-#Write loops for query parameters
-
+#Query Dates
 begin_date=(date.today() + relativedelta(months=-1)).strftime('%m/%d/%Y')
 end_date=date.today().strftime('%m/%d/%Y')
 
 
+#This shouldn't change
 search_trans_list=["rcpt_src","expn_src","pldg_src","loan_src","guar_src","CRED_SRC"]
+
 for trans in search_trans_list:
     create_table_string="create table "+trans+" ('Report Num' string)"
     scraperwiki.sqlite.execute(create_table_string)
@@ -77,7 +78,7 @@ for search_trans in search_trans_list:
     br["searchtype"]=["1"]
     br["datetype"]=["2"]
     br["filnamsearchA"]=["2"]
-    #br["inameA"]=search_alpha
+    #br["inameA"]=search_alpha #Commenting out for all alpha..
     br["begin_dateA"]=begin_date
     br["end_dateA"]=end_date
     br["repyearA"]=["0"]
@@ -106,8 +107,13 @@ for search_trans in search_trans_list:
     
     tables = soup.findAll('table', {'cellpadding':'4'})
     
-                    
+    table_i=0  
+               
     for table in tables:
+        
+        #Console chatter
+        print "     "+str(table_i)
+        table_i+=100
 
         
         header_list=[]
@@ -116,14 +122,19 @@ for search_trans in search_trans_list:
             header_list.append(th.text.encode('utf-8').replace('&nbsp;',' ').replace('#','Num').replace("'","").strip())
         for punc in string.punctuation:
             header_list=[hl.replace(punc,'') for hl in header_list]
+
             
         trs=table.findAll('tr')
         for tr in trs:
+        
             tds=tr.findAll('td')
             data={}
             i=0
             for td in tds:
                 data[header_list[i]]=td.text.encode('utf-8').replace('&nbsp;',' ').replace('---','')
                 i+=1
+            if tr['bgcolor'].upper() == "#D7F4FF":
+                data["Corrected_Report"]="Y"
+            
     
             scraperwiki.sqlite.save(unique_keys=[], data=data, table_name=search_trans, verbose=2)

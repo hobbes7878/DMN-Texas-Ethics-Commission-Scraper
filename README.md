@@ -1,2 +1,4 @@
-DMN-Texas-Ethics-Commission-Scraper
+DMN Texas Ethics Commission Scraper 
 ===================================
+
+Written for scraperwiki.
